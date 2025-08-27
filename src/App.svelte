@@ -51,6 +51,8 @@
         min-height: 100vh;
         justify-content: center;
         align-items: center;
+        padding: 2rem 1rem;
+        box-sizing: border-box;
     }
     .container {
         display: flex;
