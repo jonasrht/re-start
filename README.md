@@ -4,7 +4,7 @@ a tui-style browser startpage, built with svelte.
 
 features:
 
-- todoist tasks integrationz
+- todoist tasks integration
 - weather (from open-meteo)
 - customizable quick links
 - stats (load time, ping, fps, viewport size)
