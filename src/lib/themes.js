@@ -13,6 +13,20 @@ export const themes = {
             '--txt-err': 'oklch(70% 0.11 0)',
         },
     },
+    nord: {
+        displayName: 'nord',
+        colors: {
+            '--bg-1': '#2e3440',
+            '--bg-2': '#3b4252',
+            '--bg-3': '#434c5e',
+            '--bg-4': '#4c566a',
+            '--txt-1': '#eceff4',
+            '--txt-2': '#d8dee9',
+            '--txt-3': 'hsl(219, 23%, 65%)',
+            '--txt-4': '#88c0d0',
+            '--txt-err': '#bf616a',
+        },
+    },
     'catppuccin-mocha': {
         displayName: 'catppuccin mocha',
         colors: {
