@@ -14,24 +14,26 @@
     })
 </script>
 
-<div class="panel">
+<div class="panel-wrapper">
     <div class="panel-label">links</div>
-    {#each columns as column}
-        <div class="column">
-            {#each column as link}
-                <a
-                    href={link.url}
-                    target={settings.linkTarget}
-                    rel="noopener noreferrer"
-                    class="link"
-                >
-                    <span>></span>
-                    {link.title}
-                </a>
-                <br />
-            {/each}
-        </div>
-    {/each}
+    <div class="panel">
+        {#each columns as column}
+            <div class="column">
+                {#each column as link}
+                    <a
+                        href={link.url}
+                        target={settings.linkTarget}
+                        rel="noopener noreferrer"
+                        class="link"
+                    >
+                        <span>></span>
+                        {link.title}
+                    </a>
+                    <br />
+                {/each}
+            </div>
+        {/each}
+    </div>
 </div>
 
 <style>

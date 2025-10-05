@@ -87,65 +87,74 @@
     })
 </script>
 
-<div class="panel">
+<div class="panel-wrapper">
     <button class="widget-label" onclick={refreshWeather} disabled={loading}>
         {loading ? 'loading...' : 'weather'}
     </button>
 
-    {#if error}
-        <div class="error">{error}</div>
-    {:else if current}
-        <div class="temp">{current.temperature_2m}°</div>
-        <div class="description">{current.description}</div>
-        <br />
-        <div class="stats">
-            <div class="col">
-                <div>
-                    humi <span class="value"
-                        >{current.relative_humidity_2m}%</span
-                    >
+    <div class="panel">
+        {#if error}
+            <div class="error">{error}</div>
+        {:else if current}
+            <div class="temp">{current.temperature_2m}°</div>
+            <div class="description">{current.description}</div>
+            <br />
+            <div class="stats">
+                <div class="col">
+                    <div>
+                        humi <span class="value"
+                            >{current.relative_humidity_2m}%</span
+                        >
+                    </div>
+                    <div>
+                        prec <span class="value"
+                            >{current.precipitation_probability}%</span
+                        >
+                    </div>
                 </div>
-                <div>
-                    prec <span class="value"
-                        >{current.precipitation_probability}%</span
-                    >
+                <div class="col">
+                    <div>
+                        wind <span class="value"
+                            >{current.wind_speed_10m} {settings.speedUnit}</span
+                        >
+                    </div>
+                    <div>
+                        feel <span class="value"
+                            >{current.apparent_temperature}°</span
+                        >
+                    </div>
                 </div>
             </div>
-            <div class="col">
-                <div>
-                    wind <span class="value"
-                        >{current.wind_speed_10m} {settings.speedUnit}</span
-                    >
+            <br />
+            <div class="forecast">
+                <div class="col">
+                    {#each forecast as forecast}
+                        <div class="forecast-time">
+                            {forecast.formattedTime}
+                        </div>
+                    {/each}
                 </div>
-                <div>
-                    feel <span class="value"
-                        >{current.apparent_temperature}°</span
-                    >
+                <div class="col">
+                    {#each forecast as forecast}
+                        <div class="forecast-temp">{forecast.temperature}°</div>
+                    {/each}
+                </div>
+                <div class="col">
+                    {#each forecast as forecast}
+                        <div class="forecast-weather">
+                            {forecast.description}
+                        </div>
+                    {/each}
                 </div>
             </div>
-        </div>
-        <br />
-        <div class="forecast">
-            <div class="col">
-                {#each forecast as forecast}
-                    <div class="forecast-time">{forecast.formattedTime}</div>
-                {/each}
-            </div>
-            <div class="col">
-                {#each forecast as forecast}
-                    <div class="forecast-temp">{forecast.temperature}°</div>
-                {/each}
-            </div>
-            <div class="col">
-                {#each forecast as forecast}
-                    <div class="forecast-weather">{forecast.description}</div>
-                {/each}
-            </div>
-        </div>
-    {/if}
+        {/if}
+    </div>
 </div>
 
 <style>
+    .panel-wrapper {
+        flex-shrink: 0;
+    }
     .temp {
         font-size: 2rem;
         font-weight: 300;

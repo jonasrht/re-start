@@ -163,7 +163,7 @@
     })
 </script>
 
-<div class="panel">
+<div class="panel-wrapper">
     <button
         class="widget-label"
         onclick={() => loadTasks(true)}
@@ -171,60 +171,65 @@
     >
         {syncing ? 'syncing...' : 'todoist'}
     </button>
-
-    {#if error}
-        <div class="error">{error}</div>
-    {:else}
-        <div class="widget-header">
-            <a
-                href="https://todoist.com/app"
-                target="_blank"
-                rel="noopener noreferrer"
-            >
-                {taskCount} task{taskCount === 1 ? '' : 's'}
-            </a>
-        </div>
-
-        <br />
-        <div class="tasks">
-            <div class="tasks-list">
-                {#each tasks as task}
-                    <div
-                        class="task"
-                        class:completed={task.checked}
-                        class:overdue={isTaskOverdue(task)}
-                    >
-                        <button
-                            onclick={() => toggleTask(task.id, !task.checked)}
-                            class="checkbox"
-                            class:completed={task.checked}
-                        >
-                            {task.checked ? '[x]' : '[ ]'}
-                        </button>
-                        {#if task.project_name && task.project_name !== 'Inbox'}
-                            <span class="task-project"
-                                >#{task.project_name}</span
-                            >
-                        {/if}
-                        <span class="task-title">{task.content}</span>
-                        {#if task.due}
-                            <span
-                                class="task-due"
-                                class:overdue-date={isTaskOverdue(task)}
-                            >
-                                {formatDueDate(task.due_date, task.has_time)}
-                            </span>
-                        {/if}
-                    </div>
-                {/each}
+    <div class="panel">
+        {#if error}
+            <div class="error">{error}</div>
+        {:else}
+            <div class="widget-header">
+                <a
+                    href="https://todoist.com/app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    {taskCount} task{taskCount === 1 ? '' : 's'}
+                </a>
             </div>
-        </div>
-    {/if}
+
+            <br />
+            <div class="tasks">
+                <div class="tasks-list">
+                    {#each tasks as task}
+                        <div
+                            class="task"
+                            class:completed={task.checked}
+                            class:overdue={isTaskOverdue(task)}
+                        >
+                            <button
+                                onclick={() =>
+                                    toggleTask(task.id, !task.checked)}
+                                class="checkbox"
+                                class:completed={task.checked}
+                            >
+                                {task.checked ? '[x]' : '[ ]'}
+                            </button>
+                            {#if task.project_name && task.project_name !== 'Inbox'}
+                                <span class="task-project"
+                                    >#{task.project_name}</span
+                                >
+                            {/if}
+                            <span class="task-title">{task.content}</span>
+                            {#if task.due}
+                                <span
+                                    class="task-due"
+                                    class:overdue-date={isTaskOverdue(task)}
+                                >
+                                    {formatDueDate(
+                                        task.due_date,
+                                        task.has_time
+                                    )}
+                                </span>
+                            {/if}
+                        </div>
+                    {/each}
+                </div>
+            </div>
+        {/if}
+    </div>
 </div>
 
 <style>
-    .panel {
-        flex: 1;
+    .panel-wrapper {
+        flex-shrink: 1;
     }
     .widget-header {
         display: flex;

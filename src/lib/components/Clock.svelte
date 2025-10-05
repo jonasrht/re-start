@@ -59,22 +59,24 @@
     })
 </script>
 
-<div class="panel">
+<div class="panel-wrapper">
     <div class="panel-label">datetime</div>
-    <div class="clock">
-        {currentHrs}<span class="colon">:</span>{currentMin}<span class="colon"
-            >:</span
-        >{currentSec}
-        {#if settings.timeFormat === '12hr'}
-            <span class="ampm">{currentAmPm}</span>
-        {/if}
+    <div class="panel">
+        <div class="clock">
+            {currentHrs}<span class="colon">:</span>{currentMin}<span
+                class="colon">:</span
+            >{currentSec}
+            {#if settings.timeFormat === '12hr'}
+                <span class="ampm">{currentAmPm}</span>
+            {/if}
+        </div>
+        <div class="date">{currentDate}</div>
     </div>
-    <div class="date">{currentDate}</div>
 </div>
 
 <style>
-    .panel {
-        flex: 1;
+    .panel-wrapper {
+        flex-grow: 1;
     }
     .clock {
         font-size: 3.125rem;

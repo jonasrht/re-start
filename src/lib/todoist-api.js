@@ -159,7 +159,7 @@ class TodoistAPI {
             // Unchecked tasks first
             if (a.checked !== b.checked) return a.checked ? 1 : -1
 
-            // Checked tasks: sort by completed_at (recent first), fallback to due date, then child_order
+            // Checked tasks: sort by completed_at (recent first)
             if (a.checked) {
                 if (a.completed_at && b.completed_at) {
                     const diff =
@@ -169,14 +169,24 @@ class TodoistAPI {
                 }
             }
 
-            // Unchecked tasks with due dates first
+            // Tasks with due dates first
             if (!a.due_date && b.due_date) return 1
             if (a.due_date && !b.due_date) return -1
 
-            // Unchecked tasks with due date: sort by due date, fallback to child order
-            if (a.due_date !== null) {
+            // Sort by due date (earliest first)
+            if (a.due_date && b.due_date) {
                 const diff = a.due_date.getTime() - b.due_date.getTime()
                 if (diff !== 0) return diff
+            }
+
+            // If both have no due dates, non-project tasks come first
+            if (!a.due_date && !b.due_date) {
+                const aHasProject = a.project_id && a.project_name !== 'Inbox'
+                const bHasProject = b.project_id && b.project_name !== 'Inbox'
+
+                if (aHasProject !== bHasProject) {
+                    return aHasProject ? 1 : -1
+                }
             }
 
             return a.child_order - b.child_order

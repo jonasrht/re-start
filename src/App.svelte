@@ -46,7 +46,6 @@
         justify-content: center;
         align-items: center;
         padding: 2rem 1rem;
-        box-sizing: border-box;
     }
     .container {
         display: flex;

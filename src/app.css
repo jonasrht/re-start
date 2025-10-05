@@ -45,17 +45,23 @@ button {
         color: var(--txt-2);
     }
 }
+
+.panel-wrapper {
+    position: relative;
+    min-width: 0;
+}
+
 .panel {
     padding: 1.5rem;
     border: 2px solid var(--bg-3);
-    position: relative;
+    overflow: hidden;
 }
 
 .panel-label,
 .widget-label {
     position: absolute;
-    top: -14px;
-    left: 8px;
+    top: -12px;
+    left: 10px;
     background-color: var(--bg-1);
     color: var(--txt-4);
     padding: 0 4px;
