@@ -229,7 +229,7 @@
 
 <style>
     .panel-wrapper {
-        flex-shrink: 1;
+        flex: 1;
     }
     .widget-header {
         display: flex;

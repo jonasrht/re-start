@@ -49,12 +49,14 @@ button {
 .panel-wrapper {
     position: relative;
     min-width: 0;
+    display: flex;
 }
 
 .panel {
     padding: 1.5rem;
     border: 2px solid var(--bg-3);
     overflow: hidden;
+    width: 100%;
 }
 
 .panel-label,
