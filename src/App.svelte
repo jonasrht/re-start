@@ -2,17 +2,43 @@
     import '@fontsource-variable/geist-mono'
     import Clock from './lib/components/Clock.svelte'
     import Links from './lib/components/Links.svelte'
+    import NotePage from './lib/components/NotePage.svelte'
     import Settings from './lib/components/Settings.svelte'
+    import Sidebar from './lib/components/Sidebar.svelte'
     import Stats from './lib/components/Stats.svelte'
     import Todoist from './lib/components/Todoist.svelte'
     import Weather from './lib/components/Weather.svelte'
 
     let showSettings = $state(false)
+    let showSidebar = $state(false)
+    let sidebarTimeout = $state(null)
+    let selectedNoteId = $state(null)
 
     function closeSettings() {
         showSettings = false
     }
+
+    function handleMouseMove(event) {
+        if (event.clientX <= 20) {
+            clearTimeout(sidebarTimeout)
+            showSidebar = true
+        } else if (event.clientX > 340) {
+            sidebarTimeout = setTimeout(() => {
+                showSidebar = false
+            }, 300)
+        }
+    }
+
+    function handleNoteSelect(noteId) {
+        selectedNoteId = noteId
+    }
+
+    function closeNotePage() {
+        selectedNoteId = null
+    }
 </script>
+
+<svelte:window on:mousemove={handleMouseMove} />
 
 <main>
     <div class="container">
@@ -35,7 +61,12 @@
         settings
     </button>
 
+    <Sidebar {showSidebar} onNoteSelect={handleNoteSelect} />
     <Settings {showSettings} {closeSettings} />
+
+    {#if selectedNoteId}
+        <NotePage noteId={selectedNoteId} onClose={closeNotePage} />
+    {/if}
 </main>
 
 <style>

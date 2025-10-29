@@ -1,10 +1,10 @@
 let defaultSettings = {
-    timeFormat: '12hr',
+    timeFormat: '24hr',
     todoistApiToken: '',
-    latitude: null,
-    longitude: null,
-    tempUnit: 'fahrenheit',
-    speedUnit: 'mph',
+    latitude: 53.0793,
+    longitude: 8.8017,
+    tempUnit: 'celsius',
+    speedUnit: 'kmh',
     linksPerColumn: 4,
     linkTarget: '_self',
     links: [

@@ -1,86 +1,72 @@
 <script>
-    import { onMount, onDestroy, untrack } from 'svelte'
-    import TodoistAPI from '../todoist-api.js'
+    import { onMount } from 'svelte'
     import { settings } from '../settings-store.svelte.js'
 
-    let api = null
     let tasks = $state([])
-    let syncing = $state(true)
-    let error = $state('')
-    let initialLoad = $state(true)
+    let newTaskInput = $state('')
     let taskCount = $derived(tasks.filter((task) => !task.checked).length)
 
-    function handleVisibilityChange() {
-        if (document.visibilityState === 'visible' && api) {
-            loadTasks()
-        }
-    }
-
-    $effect(() => {
-        const token = settings.todoistApiToken
-
-        if (untrack(() => initialLoad)) {
-            initialLoad = false
-            return
-        }
-
-        initializeAPI(token, true)
-    })
-
-    async function initializeAPI(token, clearLocalData = false) {
-        if (!token) {
-            api = null
-            tasks = []
-            syncing = false
-            error = 'no todoist api token'
-            return
-        }
-        api = new TodoistAPI(token)
-        if (clearLocalData) {
-            api.clearLocalData()
-            tasks = []
-        }
-        await loadTasks(true)
-    }
-
-    export async function loadTasks(showSyncing = false) {
+    function loadTasks() {
         try {
-            if (showSyncing) syncing = true
-            error = ''
-            await api.sync()
-            tasks = api.getTasks()
-        } catch (err) {
-            error = `failed to sync tasks`
-            console.error(err)
-        } finally {
-            if (showSyncing) syncing = false
-        }
-    }
-
-    async function toggleTask(taskId, checked) {
-        try {
-            tasks = tasks.map((task) =>
-                task.id === taskId
-                    ? {
-                          ...task,
-                          checked: checked,
-                          completed_at: checked
-                              ? new Date().toISOString()
-                              : null,
-                      }
-                    : task
-            )
-
-            if (checked) {
-                await api.completeTask(taskId)
-            } else {
-                await api.uncompleteTask(taskId)
+            const stored = localStorage.getItem('tasks')
+            if (stored) {
+                const parsed = JSON.parse(stored)
+                // Convert date strings back to Date objects
+                tasks = parsed.map(task => ({
+                    ...task,
+                    due_date: task.due_date ? new Date(task.due_date) : null,
+                    completed_at: task.completed_at ? new Date(task.completed_at) : null
+                }))
             }
-            await loadTasks()
         } catch (err) {
-            console.error(err)
-            await loadTasks()
+            console.error('Failed to load tasks:', err)
         }
+    }
+
+    function saveTasks() {
+        try {
+            localStorage.setItem('tasks', JSON.stringify(tasks))
+        } catch (err) {
+            console.error('Failed to save tasks:', err)
+        }
+    }
+
+    function addTask() {
+        if (!newTaskInput.trim()) return
+
+        const newTask = {
+            id: Date.now().toString(),
+            content: newTaskInput.trim(),
+            checked: false,
+            due: false,
+            due_date: null,
+            has_time: false,
+            completed_at: null
+        }
+
+        tasks = [...tasks, newTask]
+        newTaskInput = ''
+        saveTasks()
+    }
+
+    function toggleTask(taskId) {
+        tasks = tasks.map((task) =>
+            task.id === taskId
+                ? {
+                      ...task,
+                      checked: !task.checked,
+                      completed_at: !task.checked
+                          ? new Date()
+                          : null,
+                  }
+                : task
+        )
+        saveTasks()
+    }
+
+    function deleteTask(taskId) {
+        tasks = tasks.filter(task => task.id !== taskId)
+        saveTasks()
     }
 
     function isTaskOverdue(task) {
@@ -151,79 +137,69 @@
     }
 
     onMount(() => {
-        initializeAPI(settings.todoistApiToken)
-        if (api) {
-            tasks = api.getTasks()
-        }
-        document.addEventListener('visibilitychange', handleVisibilityChange)
-    })
-
-    onDestroy(() => {
-        document.removeEventListener('visibilitychange', handleVisibilityChange)
+        loadTasks()
     })
 </script>
 
 <div class="panel-wrapper">
-    <button
-        class="widget-label"
-        onclick={() => loadTasks(true)}
-        disabled={syncing}
-    >
-        {syncing ? 'syncing...' : 'todoist'}
-    </button>
+    <div class="widget-label">todos</div>
     <div class="panel">
-        {#if error}
-            <div class="error">{error}</div>
-        {:else}
-            <div class="widget-header">
-                <a
-                    href="https://todoist.com/app"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    {taskCount} task{taskCount === 1 ? '' : 's'}
-                </a>
-            </div>
+        <div class="widget-header">
+            <span>{taskCount} task{taskCount === 1 ? '' : 's'}</span>
+        </div>
 
-            <br />
-            <div class="tasks">
-                <div class="tasks-list">
-                    {#each tasks as task}
-                        <div
-                            class="task"
+        <br />
+
+        <div class="add-task">
+            <input
+                type="text"
+                bind:value={newTaskInput}
+                onkeydown={(e) => e.key === 'Enter' && addTask()}
+                placeholder="add a task..."
+            />
+            <button onclick={addTask}>add</button>
+        </div>
+
+        <br />
+
+        <div class="tasks">
+            <div class="tasks-list">
+                {#each tasks as task}
+                    <div
+                        class="task"
+                        class:completed={task.checked}
+                        class:overdue={isTaskOverdue(task)}
+                    >
+                        <button
+                            onclick={() => toggleTask(task.id)}
+                            class="checkbox"
                             class:completed={task.checked}
-                            class:overdue={isTaskOverdue(task)}
                         >
-                            <button
-                                onclick={() =>
-                                    toggleTask(task.id, !task.checked)}
-                                class="checkbox"
-                                class:completed={task.checked}
+                            {task.checked ? '[x]' : '[ ]'}
+                        </button>
+                        <span class="task-title">{task.content}</span>
+                        {#if task.due}
+                            <span
+                                class="task-due"
+                                class:overdue-date={isTaskOverdue(task)}
                             >
-                                {task.checked ? '[x]' : '[ ]'}
-                            </button>
-                            {#if task.project_name && task.project_name !== 'Inbox'}
-                                <span class="task-project"
-                                    >#{task.project_name}</span
-                                >
-                            {/if}
-                            <span class="task-title">{task.content}</span>
-                            {#if task.due}
-                                <span
-                                    class="task-due"
-                                    class:overdue-date={isTaskOverdue(task)}
-                                >
-                                    {formatDueDate(
-                                        task.due_date,
-                                        task.has_time
-                                    )}
-                                </span>
-                            {/if}
-                        </div>
-                    {/each}
-                </div>
+                                {formatDueDate(
+                                    task.due_date,
+                                    task.has_time
+                                )}
+                            </span>
+                        {/if}
+                        <button
+                            onclick={() => deleteTask(task.id)}
+                            class="delete-btn"
+                            title="delete task"
+                        >
+                            [x]
+                        </button>
+                    </div>
+                {/each}
             </div>
-        {/if}
+        </div>
     </div>
 </div>
 
@@ -235,6 +211,35 @@
         display: flex;
         justify-content: space-between;
     }
+    .add-task {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .add-task input {
+        flex: 1;
+        background: transparent;
+        border: 1px solid var(--txt-3);
+        color: var(--txt-1);
+        padding: 0.25rem 0.5rem;
+        font-family: inherit;
+        font-size: inherit;
+    }
+    .add-task input:focus {
+        outline: none;
+        border-color: var(--txt-1);
+    }
+    .add-task button {
+        background: transparent;
+        border: 1px solid var(--txt-3);
+        color: var(--txt-1);
+        padding: 0.25rem 0.75rem;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: inherit;
+    }
+    .add-task button:hover {
+        border-color: var(--txt-1);
+    }
     .tasks {
         max-height: 15rem;
         overflow: auto;
@@ -245,17 +250,30 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
     .task-due {
-        color: var(--txt-3);
-    }
-    .task-project {
         color: var(--txt-3);
     }
     .task.completed .task-title {
         text-decoration: line-through;
     }
     .overdue-date {
+        color: var(--txt-err);
+    }
+    .delete-btn {
+        margin-left: auto;
+        background: transparent;
+        border: none;
+        color: var(--txt-3);
+        cursor: pointer;
+        padding: 0;
+        font-family: inherit;
+        font-size: inherit;
+    }
+    .delete-btn:hover {
         color: var(--txt-err);
     }
 </style>
